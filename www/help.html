@@ -1,0 +1,372 @@
+<div class="container col-lg-12">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Accounts</h1>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr>
+                            <th colspan="2">&nbsp;</th>
+                            <th colspan="2" class="text-right">Net Balances</th>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th class="text-right">Debit</th>
+                            <th class="text-right">Credit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="record in acctList">
+                            <td>{{record[0]}}</td>
+                            <td><a href="#/acct/{{record[0]}}/{{record[1]}}/combined">{{record[1]}}</a></td>
+                            <td class="text-right">{{record[2]}}</td>
+                            <td class="text-right">{{record[3]}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Trial Balance</h1>
+                </div>
+                <div class="panel-body text-right">
+                    <strong>Total Debits: </strong>{{totalDebits}}<br/>
+                    <strong>Total Credits: </strong>{{totalCredits}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <ul class="nav nav-tabs">
+                <li ng-class="{'active': helpTopic == 'tutorial'}"><a href="#/help/tutorial">Tutorial</a></li>
+                <li ng-class="{'active': helpTopic == 'accounts'}"><a href="#/help/accounts">Accounts</a></li>
+                <li ng-class="{'active': helpTopic == 'transactions'}"><a href="#/help/transactions">Transactions</a>
+                </li>
+                <li ng-class="{'active': helpTopic == 'other'}"><a href="#/help/other">Other</a></li>
+            </ul>
+            <div ng-switch="helpTopic">
+                <div ng-switch-when="tutorial">
+<pre>
+After exploring the public demo a bit, feel free to create a private sandbox via the Authentication menu at top.
+This provides a fresh instance where a personalized account setup may be created from scratch.
+
+The first account created should be of type 'EQUITY'.  It is common to name the account 'Equity'.  This
+is the account which is used to establish all of the starting balances for the other accounts.  You are now the founder
+of a business to run your life, complete with all its assets, expenses, revenues, and liabilities.  The Equity account
+represents your initial investment in this business -- it is where the money came from before it was sorted out into
+things like checking and savings accounts.
+
+Once the Equity account is available, create some ASSET accounts.  The most straightforward examples are cash
+accounts like checking and savings.  Add transactions to move money from the EQUITY account into the ASSET accounts to
+reflect their starting balances.  If you plan to add historical data, ensure the starting balance reflects the earliest
+point desired in the history of the account and that it is dated correctly.  The starting balance transaction should be
+the first transaction in the account by transaction date.
+
+LIABILITY accounts are things like credit cards, where you have some sort of line of credit or a loan.  They are
+the inverse of ASSET accounts, so starting balances count against your initial investment.  When creating the starting
+balance transaction for these accounts, move money from the LIABILITY account to the EQUITY account (the opposite
+direction than with ASSET account starting balance transactions).
+
+At this point, you can add transactions to represent cash flows between these accounts, e.g. balance transfers or
+credit card / loan payments.  It's time to define REVENUE and EXPENSE accounts to reflect cash flows to and from
+external entities.  Transactions in these accounts generally apply against one of your ASSET or LIABILITY accounts
+(e.g. paid gas with a credit card, paycheck deposited into checking account).  They typically will not have or need
+a starting balance transaction.
+
+	[caution ahead: at time of writing, support for labels and imports has not been fully exposed to users]
+
+There are a couple schools of thought on how to set up your EXPENSE accounts.  Some advocate setting up a separate
+account for each counterparty you deal with and use labels.  For example, you could have a separate account for each
+grocery store chain you visit so that you see how much you spend at each store, then have all of those transactions
+labeled 'groceries' so you can track your overall total separately.  Others prefer to just have one generic 'Groceries'
+account (you could, of course, still use labels to track each store if you wanted).  It's up to you.
+
+Once your accounts are set up, they may be used in the 'Import' screen.  Patterns may be defined for each
+ASSET and LIABILITY account.  You obtain a copy of each account's transaction history from (your bank here)'s Online
+Banking site and feed it in to the importer.  The importer uses the patterns from the 'Import' screen and creates
+transactions automatically.  For example, you can set up patterns on your credit card account which match payments
+made from your checking account, or match anything with the word 'gas' and associate it with the EXPENSE:Gas account.
+</pre>
+                </div>
+                <div ng-switch-when="other">
+<pre>
+this is the accounting package
+we'll start off with some basic definitions
+
+The Basic Accounting Equation
+Assets = Liabilities + Owners' Equity
+An org's assets are equal to its equities
+
+typical assets:
+cash, accounts receivable, equipment, land, buildings, inventory, investments
+
+equities: claims to assets (e.g. by owners, lenders)
+
+ownership claims to assets are called:
+owners' equity if unincorporated
+stockholders' equity if a corporation
+
+liabilities: claims of outside parties (banks, suppliers)
+
+balance sheet has assets on the left, liabilities / owners' equity on the right
+
+revenue and expenses impact owners' equity
+revenues increase it; expenses reduce it
+
+balances
+add up the debits and credits, subtract the smaller from the larger
+balance is referred to as debit or credit balance based on which side is larger
+Normal Balance Types
+Asset		Debit
+Liability	Credit
+Equity		Credit
+Revenue		Credit
+Expense		Debit
+
+Trial Balance
+a listing of all accounts with their debit and credit balances
+prepared at the end of an accounting period
+first step in developing financial statements
+it's "in balance" when sum of credit balances == sum of debit balances
+How to:
+Determine the balance of each account
+List all accounts, placing debit and credit balances in separate columns
+sum debits and credit balances separately
+compare the total of the debit and credit columns
+
+
+Adjustments
+
+Prepaids
+You may have noticed that prepaid expenses are listed as assets.  why does that make sense?
+This is because the bill hasn't actually come due yet, so no money has been spent yet!
+At the end of each accounting period, accruals and adjustments are made which
+reflect the actual expense during the period
+Example: 4800 for a 2-year insurance policy goes into a prepaid insurance asset account
+Each month the bill is 200, so for each monthly accounting period an adjustment
+is made which debits an insurance expense account and credits the prepaid insurance asset
+
+Inventory / Cost of Goods Sold
+What you bought during the accounting period is not necessarily your cost of goods,
+as you started with some inventory and ended up with some
+Beginning inventory + purchases - ending inventory = cost of goods
+If you end up with more inventory than you started with, then your adjustment will
+credit the inventory asset account and debit the cost of goods expense account
+
+Depreciation
+annual depreciation = (original cost - salvage value) / useful life expectancy
+to record the adjustment, you debit the depreciation expense account and credit the
+accumulated depreciation asset account
+accumulated depreciation is actually a contra-asset account, which is an asset account
+that normally has a credit balance and is used to offset specific asset accounts
+
+
+Accruals
+
+Payroll
+At the end of the month, employees may have worked some time for which they have not yet
+been paid.  GAAP says this needs to be reflected in the period where the expense is
+incurred.  The adjustment is a debit to the payroll expense account and a credit to the
+accrued payroll liability account. related expenses like FICA, unemployment taxes should
+be included as it is all money owed.
+
+Interest
+like payroll accruals, this is interest expenses for loans incurred during the period
+but not paid.  interest = remaining principal * rate * time
+time is length of accounting period / days in the year (assuming interest is APR)
+The adjustment is a debit to the interest expense account and a credit to the accrued
+interest liability account.
+
+
+Financial statements (post-adjustments)
+balance sheet: biz's assets and claims to its assets
+income statement: revenues and expenses for the current accounting period
+net income and losses are added/deducted from owners' equity prior to preparing the balance sheet
+the income statement is based on revenue and expense accounts
+those are then closed out to the owners' equity accounts (or retained earnings)
+the balance sheet is then based on the asset, liability, and equity accounts
+
+owners' equity withdrawls
+owners may withdraw funds for personal use
+use a temporary owners' equity account titled (Owner), Withdrawals
+this account is not an expense account and should not appear on the income statement
+it is closed to the owners' equity account at the end of the period
+
+dividends
+a corporation's board of directors may declare a dividend
+debit retained earnings and credit dividends payable (liability account)
+
+
+The accounting cycle
+
+Journalizing
+process of analyzing and classifying transactions
+most common is the general journal
+all adjustments and closing entries are recorded in the general journal
+
+Posting
+the recording of debits and credits from journals to the proper accounts
+most common and comprehensive is the general ledger, which consists of
+accounts for all assets, liabilities, equity, revenues, and expenses
+
+Trial Balance
+proves that debits equal credits
+conducted just prior to recording adjustments
+if the debits and credits are not equal, the reason must be determined
+and fixed before making any adjustments
+
+Adjustments
+inventory, prepaid expenses, depreciation, accruals
+after recording in the journal, they must be posted to the ledger accounts
+
+Adjusted Trial Balance
+checks that adjusting entries have been properly posted
+
+Financial Statements
+balance sheet and income statement
+prepared directly from either the adjusted trial balance or from the ledger accounts
+may also prepare other statements like cash flow, retained earnings, etc at this time
+
+Closing Temporary Proprietorship Accounts
+record and post the closing entries
+revenue, expense, and withdrawal accounts are closed with entries that clear them
+so that operating results and withdrawals of the following period can be recorded
+
+Post-Closing Trial Balance
+tests the equality of debit and credit accounts again
+only has asset, liability, and equity accounts since everything else has been closed
+</pre>
+                </div>
+                <div ng-switch-when="accounts">
+<pre>
+
+	transactions are recorded in accounts
+
+	Types and example groupings of accounts
+	Asset
+	  cash on hand (cash on hand / safe / registers / etc)
+	  cash on deposit (cash in bank, separate account per bank account)
+	  accounts receivable (cash due from guests)
+	  allowance for doubtful accounts
+	  notes receivable (promisory notes from employees)
+	  inventory
+	  marketable securities (short-term cash investments)
+	  prepaid expenses (rent, licenses, insurance (all separate accounts))
+	  investments (long-term stocks and bonds, generally reported at cost)
+	  land
+	  buildings
+	  equipment
+	  furniture
+	  china/glassware/silver/linen (or could be expensed)
+	  accumulated depreciation
+	  deposits (e.g. utility deposits)
+	Liability
+	  accounts payable - trade (ordinary amounts due to suppliers, normal biz expenses)
+	  accounts payable - other (equipment, non-standard expenses)
+	  notes payable
+	  taxes payable (one per type of tax)
+	  deposits from guests for future events
+	  accrued expenses (amts payable for expenses incurred at or near the end of an
+		  accounting period including accrued payroll, utilities, interest, rent)
+	  dividends payable
+	  long-term debt (debt not due for 12 months from the balance sheet date)
+	Equity
+	  Non-incorporated
+		  (Name of Proprietor or Partner), Capital: owner's net worth in the business
+			  this is the initial investment less withdrawls and operating losses plus profits
+	  Corporations
+		  capital stock (one per type of stock issued)
+		  paid-in capital in excess of par (proceeds from sale of capital stock in excess of the par value)
+		  retained earnings
+
+	Revenue accounts
+	  food, beverage, other, interest income, dividend income
+
+	Expense accounts
+	  food cost, uniforms, supplies, laundry, decor, rent, utilites, depreciation (non-accumulated), etc
+
+	Revenue and expense accounts are really temporary owners' equity accounts
+	they are closed out each period to the permanent owners' equity accounts
+
+</pre>
+                </div>
+                <div ng-switch-when="transactions">
+<pre>
+
+	all transactions affect the basic accounting equation
+	there are 9 enumerated types of accounting transactions
+		Increase one asset and decrease another asset
+			buy equipment: Dr. Equipment, Cr. Cash
+		Increase an asset and increase a liability
+			borrow cash from the bank: Dr. Cash, Cr. Notes payable
+		Increase an asset and increase an owners' equity account
+			owner invests in the biz: Dr. Cash, Cr. Owner capital
+		Increase one liability and decrease another liability
+			a note is made in exchange for an account payable: Dr. Accounts payable, Cr. Notes payable
+		Decrease a liability and decrease an asset
+			pay a supplier: Dr. Accounts payable, Cr. Cash
+		Increase a liability and decrease an owners' equity account
+			dividends declared: Dr. Retained earnings and Cr. Dividends payable
+		Decrease an asset and decrease an owners' equity account
+			owner withdraws cash: Dr. Owner capital and Cr. Cash
+		Decrease a liability and increase an owners' equity account
+			long-term debt owed to the owner is converted to equity: Dr. Long-term debt, Cr. Owner capital
+		Increase an owners' equity account and decrease another owners' equity account
+			preferred stock converted to common stock: Dr. preferred, Cr. common
+
+	PROHIBITED TRANSACTIONS are those that ONLY:
+		increase an asset and decrease a liability
+		decrease an asset and increase a liability
+		increase a liability and increase an owners' equity account
+		decrease a liability and decrease an owners' equity account
+		decrease an asset and increase an owners' equity account
+		increase an asset and decrease an owners' equity account
+
+	how to determine entries in recording a transaction
+		determine which accounts are affected
+		determine whether to debit or credit the accounts
+		determine the amounts to be recorded
+
+	debits are entries made on the left side of a T account
+	credits are entries made on the right side of a T account
+	either of these can be an increase or decrease to the account depending on type
+
+	debit/credit (Dr./Cr.) account relationships:
+	   ASSETS     LIABILITIES    EQUITY     REVENUES     EXPENSES
+	   -------    -----------    -------    ---------    ---------
+	    + | -        - | +        - | +       - | +        + | -
+	   Dr.|Cr.     Dr. | Cr.     Dr.|Cr.    Dr. | Cr.    Dr. | Cr.
+
+	in a transaction, sum(debits) == sum(credits)
+
+	The six classes of prohibited transactions cannot occur as long as debits
+	and credits are balanced with each other.
+
+
+	IMPLEMENTATION NOTES
+
+	Get a new xact instance and call add_[credit|debit] as appropriate
+	to build up the intended effect on the underlying accounts.
+
+	For example, if you buy something for 10k with 7500/2500 loan/cash,
+	you debit that asset for 10k, credit the cash account for 2500, and credit
+	the loan's liability account for 7500.
+
+	Once all the credits and debits have been entered, you call the save
+	method. The transaction will be validated, and it will be passed to the
+	various debit/credit methods for the underlying accounts twice.  The first
+	time, the commit flag is False, so if there are any issues trying to add
+	the data to the account, an appropriate exception will be raised.  If that
+	completes ok then the commit flag is turned on and the data is sent again
+	for actual storage.
+
+</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

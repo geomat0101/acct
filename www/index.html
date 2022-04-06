@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html ng-app="acctApp">
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!--bootstrap-->
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.css">
+    <link href="css/theme.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script src="js/bootstrap.js"></script>
+
+    <!--angular-->
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
+    <script src="js/acct.js"></script>
+
+    <script src="js/date.js"></script>
+
+    <title>BlingBase</title>
+</head>
+
+<body role="document">
+<div class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">BlingBase</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#/">Accounts</a></li>
+                <li><a href="#/xact">Transactions</a></li>
+                <li><a href="#/import">Import</a></li>
+                <li class="dropdown">
+                    <a href="" class="dropdown-toggle" data-toggle="dropdown">Reports <span class="caret"></span></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="dropdown-header">Coming Soon</li>
+                        <li class="divider"></li>
+                        <li><a href="#/income">Income Statement</a></li>
+                        <li><a href="#/balance">Balance Sheet</a></li>
+                        <li><a href="#/charts">Charts</a></li>
+                        <li><a href="#/budgets">Budgeting</a></li>
+                    </ul>
+                </li>
+                <li><a href="#/help">Help</a></li>
+                <li><a href="#/login">Authentication</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+
+<div class="ng-view"></div>
+
+
+</body>
+</html>

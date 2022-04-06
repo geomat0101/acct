@@ -1,0 +1,126 @@
+<div class="container col-lg-12">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Accounts</h1>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed">
+                        <thead>
+                        <tr>
+                            <th colspan="2">&nbsp;</th>
+                            <th colspan="2" class="text-right">Net Balances</th>
+                        </tr>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th class="text-right">Debit</th>
+                            <th class="text-right">Credit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="record in acctList">
+                            <td>{{record[0]}}</td>
+                            <td><a href="#/acct/{{record[0]}}/{{record[1]}}/combined">{{record[1]}}</a></td>
+                            <td class="text-right">{{record[2]}}</td>
+                            <td class="text-right">{{record[3]}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h1 class="panel-title">Trial Balance</h1>
+                </div>
+                <div class="panel-body text-right">
+                    <strong>Total Debits: </strong>{{totalDebits}}<br/>
+                    <strong>Total Credits: </strong>{{totalCredits}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2>Add a Transaction</h2>
+                </div>
+                <div class="panel-body">
+                    <form>
+                        <h3>Move Money</h3>
+
+                        <div class="col-md-7">
+                            <div class="row">
+                                <div class="col-md-4"><strong>To Account:</strong>
+                                    <select class="form-control"
+                                            ng-model="debitAcct"
+                                            ng-options="(acct[0] + ':' + acct[1]) for acct in acctList"></select>
+                                </div>
+                                <div class="col-md-4"><strong>From Account:</strong>
+                                    <select class="form-control"
+                                            ng-model="creditAcct"
+                                            ng-options="(acct[0] + ':' + acct[1]) for acct in acctList"></select>
+                                </div>
+                                <div class="col-md-4"><strong>Amount:</strong>
+                                    <input class="form-control"
+                                           ng-model="amount"></div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <strong>Description:</strong> <input class="form-control" ng-model="description">
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Date:</strong>
+
+                                    <div class="input-group">
+                                        <div class="input-group-addon"><span
+                                                class="glyphicon glyphicon-calendar"></span>
+                                        </div>
+                                        <input class="form-control" type="text" ng-model="xactDate" ui-date>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn-success btn-lg" ng-click="submitAddXact()">Dooo Eeeet</button>
+                            <br/><br/>
+                            <button class="btn-danger btn-lg" ng-click="amount='';description=''">Screw That</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h2>Add a new Account</h2>
+                </div>
+                <div class="panel-body">
+                    <form>
+                        <div class="col-md-7">
+                            <div class="row">
+                                <div class="col-md-4"><strong>Account Type:</strong>
+                                    <select class="form-control"
+                                            ng-model="newAcctType">
+                                        <option>ASSET</option>
+                                        <option>EXPENSE</option>
+                                        <option>REVENUE</option>
+                                        <option>LIABILITY</option>
+                                        <option>EQUITY</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4"><strong>Account Name:</strong>
+                                    <input class="form-control"
+                                           ng-model="newAcctName"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn-success btn-lg" ng-click="submitAddAcct()">Dooo Eeeet</button>
+                            <br/><br/>
+                            <button class="btn-danger btn-lg" ng-click="newAcctName=''">Screw That</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
