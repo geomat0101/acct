@@ -3,6 +3,7 @@
 # wsgi api
 
 import collections
+import config
 import os
 import re
 
@@ -25,14 +26,14 @@ class api (object):
         self.loggedIn = self.userAuth = False
 
         if self.userdb.authenticate(username, password):
-            self.dbfile = '/home/mdg/src/acct/data.db.%s' % username
+            self.dbfile = os.path.join(config.DBDIR, 'data.db.%s' % username)
             self.sid = self.userdb.register_session(self.dbfile)
             self.userAuth = True
         else:
             self.dbfile = self.userdb.retrieve_session(self.sid)
 
         if not self.dbfile:
-            self.dbfile = '/home/mdg/src/acct/data.db'
+            self.dbfile = os.path.join(config.DBDIR, 'data.db')
         else:
             self.loggedIn = True
 
@@ -76,12 +77,12 @@ class api (object):
         return QIFPattern(self.db).get_pending()
 
 
-    def create_instance(self, username, password):
-        dbfile = '/home/mdg/src/acct/data/%s.db' % username
-        if os.path.exists(dbfile):
-            return False
-        self.userdb.add_user(username, password)
-        return True
+    # def create_instance(self, username, password):
+    #     dbfile = '.........' % username
+    #     if os.path.exists(dbfile):
+    #         return False
+    #     self.userdb.add_user(username, password)
+    #     return True
 
 
     def applyQIFData(self, srcAcctType, srcAcctName, qifFile):

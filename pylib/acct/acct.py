@@ -150,7 +150,7 @@
 
 
 import os
-from sqldata import *
+import sqldata
 from decimal import Decimal as D
 
 account_types = ['ASSET', 'EQUITY', 'EXPENSE', 'LIABILITY', 'REVENUE']
@@ -239,7 +239,7 @@ class Account (object):
 		self.name = name
 		self.atype = atype
 
-		self.data = AccountData(self.db, atype, name, create)
+		self.data = sqldata.AccountData(self.db, atype, name, create)
 
 		(self.total_debits, self.debits)   = self.data.get_xact_data(xtype='debit')
 		(self.total_credits, self.credits) = self.data.get_xact_data(xtype='credit')
@@ -254,15 +254,15 @@ class Account (object):
 		self.debit_balance  = ""
 		self.credit_balance = ""
 
-		credits = D(self.total_credits)
-		debits  = D(self.total_debits)
+		credit = D(self.total_credits)
+		debit  = D(self.total_debits)
 
-		if debits > credits:
-			self.debit_balance = "%0.2f" % (debits - credits)
+		if debit > credit:
+			self.debit_balance = "%0.2f" % (debit - credit)
 			if self.debit_balance == "0.00":
 				self.debit_balance = ""
-		elif credits > debits:
-			self.credit_balance = "%0.2f" % (credits - debits)
+		elif credit > debit:
+			self.credit_balance = "%0.2f" % (credit - debit)
 			if self.credit_balance == "0.00":
 				self.credit_balance = ""
 
@@ -417,7 +417,7 @@ class Xact (object):
 		self.total_debits  = D(0)
 		self.date = None
 		self.description = ""
-		self.data = XactData(self.db)
+		self.data = sqldata.XactData(self.db)
 
 		self.readonly = False
 		if xid is not None:
@@ -466,7 +466,6 @@ class Xact (object):
 
 if __name__ == '__main__':
 	import doctest
-	import sqldata
 	# clean up prior test data
 	if os.path.exists("testdata.db"):
 		os.unlink("testdata.db")

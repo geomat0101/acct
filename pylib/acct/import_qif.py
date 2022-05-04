@@ -11,56 +11,6 @@ import re
 import acct
 import qif
 
-if __name__ == "__main__":
-    already_done = []
-
-    for source_account in ["Checking", "Savings"]:
-        fname = "%s.qif" % source_account
-        q=qif.QIF(filename=fname)
-
-        xacts = q.sections[0]
-        for xact in xacts:
-            matched_account = None
-            for account in map_payees:
-                if not map_payees[account]['compiled']:
-                    map_payees[account]['compiled'] = []
-                    for pattern in map_payees[account]['patterns']:
-                        map_payees[account]['compiled'].append(re.compile(pattern))
-                for pattern in map_payees[account]['compiled']:
-                    if pattern.search(xact['payee']):
-                        matched_account = account
-                        break
-                if matched_account:
-                    break
-
-            if not matched_account:
-                raise ValueError("No Match: %s" % xact['payee'])
-
-            (atype, aname) = matched_account.split(':', 1)
-
-            if aname in already_done:
-                continue
-
-            amount = xact['amount']
-                    
-            x=acct.Xact()
-
-            if amount > 0:
-                # asset debit
-                x.add_debit(source_account, "asset", amount)
-                x.add_credit(aname, atype, amount)
-            else:
-                # asset credit
-                amount = abs(amount)
-                x.add_credit(source_account, "asset", amount)
-                x.add_debit(aname, atype, amount)
-
-    #        print("new %s xact: %s %s - %s" % (source_account, matched_account, amount, xact['payee']))
-            x.save(create=True, date=xact['date'], description=xact['payee'])
-        
-        already_done.append(source_account)
-
-
 map_payees = {
         'asset:Bullion':    {    'patterns': [    'Bullion Direct, Inc. Bill Payment',
                                                 'BKOFAMERICA ATM 08/23 #000009325 DEPOSIT BROADWAY/WARREN NEW YORK NY',
@@ -140,5 +90,57 @@ map_payees = {
                             'compiled': None
                         },
     }
+
+
+
+
+if __name__ == "__main__":
+    already_done = []
+
+    for source_account in ["Checking", "Savings"]:
+        fname = "%s.qif" % source_account
+        q=qif.QIF(filename=fname)
+
+        xacts = q.sections[0]
+        for xact in xacts:
+            matched_account = None
+            for account in map_payees:
+                if not map_payees[account]['compiled']:
+                    map_payees[account]['compiled'] = []
+                    for pattern in map_payees[account]['patterns']:
+                        map_payees[account]['compiled'].append(re.compile(pattern))
+                for pattern in map_payees[account]['compiled']:
+                    if pattern.search(xact['payee']):
+                        matched_account = account
+                        break
+                if matched_account:
+                    break
+
+            if not matched_account:
+                raise ValueError("No Match: %s" % xact['payee'])
+
+            (atype, aname) = matched_account.split(':', 1)
+
+            if aname in already_done:
+                continue
+
+            amount = xact['amount']
+                    
+            x=acct.Xact()
+
+            if amount > 0:
+                # asset debit
+                x.add_debit(source_account, "asset", amount)
+                x.add_credit(aname, atype, amount)
+            else:
+                # asset credit
+                amount = abs(amount)
+                x.add_credit(source_account, "asset", amount)
+                x.add_debit(aname, atype, amount)
+
+    #        print("new %s xact: %s %s - %s" % (source_account, matched_account, amount, xact['payee']))
+            x.save(create=True, date=xact['date'], description=xact['payee'])
+        
+        already_done.append(source_account)
 
 
