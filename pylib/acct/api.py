@@ -77,12 +77,12 @@ class api (object):
         return QIFPattern(self.db).get_pending()
 
 
-    # def create_instance(self, username, password):
-    #     dbfile = '.........' % username
-    #     if os.path.exists(dbfile):
-    #         return False
-    #     self.userdb.add_user(username, password)
-    #     return True
+    def create_instance(self, username, password):
+        dbfile = os.path.join(config.DBDIR, 'data.db.%s' % username)
+        if os.path.exists(dbfile):
+            return False
+        self.userdb.add_user(username, password)
+        return True
 
 
     def applyQIFData(self, srcAcctType, srcAcctName, qifFile):
