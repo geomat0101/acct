@@ -46,7 +46,7 @@ def normalize_date (date):
 
 class userDB (object):
 
-    dbfile = '/home/mdg/src/acct/users.db'
+    dbfile = '/home/mdg/src/acct/data.db.users'
 
     def __init__(self):
         self.conn = sqlite3.connect(self.dbfile)
