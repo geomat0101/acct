@@ -9,8 +9,6 @@ from Cookie import SimpleCookie
 from decimal import Decimal as D
 from tempfile import TemporaryFile
 
-sys.path.insert(0, "/home/mdg/src")
-
 from acct.api import api as API
 from acct.acct import Account
 

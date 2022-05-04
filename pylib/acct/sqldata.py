@@ -4,6 +4,7 @@
 # sqlite initially, maybe postgres later
 
 import base64
+import config
 import datetime
 import os
 
@@ -46,7 +47,7 @@ def normalize_date (date):
 
 class userDB (object):
 
-    dbfile = '/home/mdg/src/acct/data.db.users'
+    dbfile = os.path.join(config.DBDIR, 'data.db.users')
 
     def __init__(self):
         self.conn = sqlite3.connect(self.dbfile)
