@@ -56,7 +56,10 @@ def application(environ, start_response):
     api = API(sessionId, username=username, password=password)
 
     # quick and dirty wsgi-rpc... assume caller knows what they're doing
-    method = query['method'][0]
+    if 'method' not in query:
+        method = 'logout'
+    else:
+        method = query['method'][0]
 
     if method == 'logout':
         api.sid = 'LOGOUT'

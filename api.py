@@ -25,7 +25,7 @@ class api (object):
         self.loggedIn = self.userAuth = False
 
         if self.userdb.authenticate(username, password):
-            self.dbfile = '/home/mdg/src/acct/data/%s.db' % username
+            self.dbfile = '/home/mdg/src/acct/data.db.%s' % username
             self.sid = self.userdb.register_session(self.dbfile)
             self.userAuth = True
         else:
