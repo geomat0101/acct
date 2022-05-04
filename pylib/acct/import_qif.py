@@ -92,12 +92,15 @@ map_payees = {
     }
 
 
-
+import config
+import os
+from sqldata import DBHandle
 
 if __name__ == "__main__":
     already_done = []
+    db = DBHandle(dbfile=os.path.join(config.DBDIR, 'data.db.mdgnew'))
 
-    for source_account in ["Checking", "Savings"]:
+    for source_account in ["Checking"]:
         fname = "%s.qif" % source_account
         q=qif.QIF(filename=fname)
 
@@ -116,17 +119,21 @@ if __name__ == "__main__":
                 if matched_account:
                     break
 
+            amount = xact['amount']
+
             if not matched_account:
-                raise ValueError("No Match: %s" % xact['payee'])
+                if amount > 0:
+                    matched_account = 'REVENUE:Rev_-_Default'
+                else:
+                    matched_account = 'EXPENSE:Exp_-_Default'
+#                raise ValueError("No Match: %s" % xact['payee'])
 
             (atype, aname) = matched_account.split(':', 1)
 
             if aname in already_done:
                 continue
 
-            amount = xact['amount']
-                    
-            x=acct.Xact()
+            x=acct.Xact(db)
 
             if amount > 0:
                 # asset debit
