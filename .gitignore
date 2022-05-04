@@ -1,2 +1,4 @@
 data.db*
+users.db*
 *.qif
+*.pyc
