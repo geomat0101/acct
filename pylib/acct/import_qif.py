@@ -7,126 +7,57 @@ needs to be restructured into a class, currently assumes specific filenames are 
 needs unit tests
 """
 
-import re
 import acct
-import qif
-
-map_payees = {
-        'asset:Bullion':    {    'patterns': [    'Bullion Direct, Inc. Bill Payment',
-                                                'BKOFAMERICA ATM 08/23 #000009325 DEPOSIT BROADWAY/WARREN NEW YORK NY',
-                                                'BKOFAMERICA ATM 08/17 #000007950 DEPOSIT BROADWAY/WARREN NEW YORK NY',
-                                            ],
-                                'compiled': None,
-                            },
-        'expense:ATM':    {     'patterns':    ['WITHDRWL'],
-                            'compiled': None
-                        },
-        'expense:Amex_Platinum':    {    'patterns': ['^AMERICAN EXPRESS DES:AM PMT ID:'],
-                                        'compiled': None
-                                    },
-        'expense:BoA_Amex':    {    'patterns': [ 'Online Banking payment to CRD 1310' ],
-                                'compiled': None
-                            },
-        'expense:Fees':    {    'patterns': [
-                                    '^BANK OF AMERICA DES:TRIALCREDT'
-                                ],
-                            'compiled': None
-                        },
-        'revenue:Other_Income': {    'patterns': [    '^BKOFAMERICA ATM .* DEPOSIT',
-                                                    'IRS DES:USATAXPYMT',
-                                                    'NY STATE DES:TAX REFUND',
-                                                    'Online Banking transfer from CHK 3050 .* TRIBBLE, MARCI',
-                                                    'Online Banking transfer from SAV 8323 .* TRIBBLE, MARCI',
-                                                    'Counter Credit',
-                                                    'ORIGINS REAL EST DES:PAYMENT .* INDN:MATTHEW GEORGE',
-                                                ],
-                                    'compiled': None
-                                },
-        'revenue:Interest': {    'patterns': ['Interest Earned'],
-                                'compiled': None
-                            },
-        'expense:Mortgage': {    'patterns': ['Bank of America DES:MORTGAGE'],
-                                'compiled': None
-                            },
-        'expense:Discretionary': {    'patterns': [    '^CHECKCARD',
-                                                    'Patrick George Bill Payment',
-                                                ],
-                                    'compiled': None
-                                },
-        'expense:Power': {    'patterns': ['^CON ED OF NY DES:INTELL CK ID:'],
-                            'compiled': None
-                        },
-        'revenue:Salary': {    'patterns': [ 'GOLDMAN, SACHS & DES:PAYROLL' ],
-                            'compiled': None
-                        },
-        'expense:Newton': {    'patterns': [    'Kirk Stansbury Bill Payment',
-                                            'Origins Real Estate Bill Payment'
-                                        ],
-                            'compiled': None
-                        },
-        'asset:Savings': {    'patterns': [    'Online Banking transfer .* SAV 0488',
-                                            'Online Banking transfer .* Sav 0488',
-                                            'Online scheduled transfer .* Sav 0488',
-                                        ],
-                            'compiled': None
-                        },
-        'asset:Checking': {    'patterns':    [    'Online .* transfer .* CHK 8728' ],
-                            'compiled': None
-                        },
-        'asset:PWM': {        'patterns': [ '^Check 60' ],
-                            'compiled': None
-                        },
-        'expense:Rent': {    'patterns': [ 'Yon Kyong Yoo Bill Payment' ],
-                            'compiled': None
-                        },
-        'expense:Phone': {    'patterns': [    'T-MOBILE Bill Payment',
-                                            'T-Mobile Bill Payment'
-                                        ],
-                            'compiled': None
-                        },
-        'expense:Cable': {    'patterns': [    'TIME WARNER CABLE Bill Payment',
-                                            'Time Warner Cable Bill Payment'
-                                        ],
-                            'compiled': None
-                        },
-    }
-
-
 import config
 import os
+import qif
+import re
 from sqldata import DBHandle
+from payeeMap import map_payees
 
 if __name__ == "__main__":
     already_done = []
     db = DBHandle(dbfile=os.path.join(config.DBDIR, 'data.db.mdgnew'))
 
-    for source_account in ["Checking"]:
+    for source_account in ["AMEX"]:
         fname = "%s.qif" % source_account
         q=qif.QIF(filename=fname)
 
         xacts = q.sections[0]
         for xact in xacts:
             matched_account = None
-            for account in map_payees:
-                if not map_payees[account]['compiled']:
-                    map_payees[account]['compiled'] = []
-                    for pattern in map_payees[account]['patterns']:
-                        map_payees[account]['compiled'].append(re.compile(pattern))
-                for pattern in map_payees[account]['compiled']:
-                    if pattern.search(xact['payee']):
-                        matched_account = account
+            if q.account_type != 'LIABILITY':
+                for account in map_payees:
+                    if not map_payees[account]['compiled']:
+                        map_payees[account]['compiled'] = []
+                        for pattern in map_payees[account]['patterns']:
+                            map_payees[account]['compiled'].append(re.compile(pattern))
+                    for pattern in map_payees[account]['compiled']:
+                        if pattern.search(xact['payee']):
+                            matched_account = account
+                            break
+                    if matched_account:
                         break
-                if matched_account:
-                    break
 
             amount = xact['amount']
 
             if not matched_account:
-                if amount > 0:
-                    matched_account = 'REVENUE:Rev_-_Default'
+                if q.account_type == 'LIABILITY':
+                    # normal balance type is inverted
+                    if amount > 0:
+                        matched_account = 'EXPENSE:Exp_-_Default'
+                        if 'memo' in xact:
+                            try:
+                                matched_account = 'expense:%s' % xact['memo'].decode('ascii')
+                            except UnicodeDecodeError:
+                                pass
+                    else:
+                        matched_account = 'ASSET:Checking'
                 else:
-                    matched_account = 'EXPENSE:Exp_-_Default'
-#                raise ValueError("No Match: %s" % xact['payee'])
+                    if amount > 0:
+                        matched_account = 'REVENUE:Rev_-_Default'
+                    else:
+                        matched_account = 'EXPENSE:Exp_-_Default'
 
             (atype, aname) = matched_account.split(':', 1)
 
@@ -135,17 +66,26 @@ if __name__ == "__main__":
 
             x=acct.Xact(db)
 
-            if amount > 0:
-                # asset debit
-                x.add_debit(source_account, "asset", amount)
-                x.add_credit(aname, atype, amount)
+            if q.account_type == 'LIABILITY':
+                if amount > 0:
+                    x.add_credit(source_account, q.account_type, amount)
+                    x.add_debit(aname, atype, amount)
+                else:
+                    amount = abs(amount)    # no negative values
+                    x.add_debit(source_account, q.account_type, amount)
+                    x.add_credit(aname, atype, amount)
             else:
-                # asset credit
-                amount = abs(amount)
-                x.add_credit(source_account, "asset", amount)
-                x.add_debit(aname, atype, amount)
+                if amount > 0:
+                    # asset debit
+                    x.add_debit(source_account, q.account_type, amount)
+                    x.add_credit(aname, atype, amount)
+                else:
+                    # asset credit
+                    amount = abs(amount)    # no negative values
+                    x.add_credit(source_account, q.account_type, amount)
+                    x.add_debit(aname, atype, amount)
 
-    #        print("new %s xact: %s %s - %s" % (source_account, matched_account, amount, xact['payee']))
+            print("new %s xact: %s %s - %s" % (source_account, matched_account, amount, xact['payee']))
             x.save(create=True, date=xact['date'], description=xact['payee'])
         
         already_done.append(source_account)
