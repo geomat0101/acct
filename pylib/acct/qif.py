@@ -7,11 +7,11 @@ Quicken Interchange Format (QIF) parser - 4-digit year format
 spec from http://en.wikipedia.org/wiki/Quicken_Interchange_Format
 """
 
-import os, datetime
+import os, datetime, re
 from decimal import Decimal
 
 class QIF (object):
-    
+
     map_header_types = {
             'Cash':     {'description': 'Cash Flow: Cash Account',        'account_type': 'EXPENSE'},
             'Bank':     {'description': 'Cash Flow: Checking Account',    'account_type': 'ASSET'},
@@ -23,7 +23,7 @@ class QIF (object):
             'Class':     {'description': 'Class list',                     'account_type': None },
             'Memorized':{'description': 'Memorized transaction list',     'account_type': None },
         }
-    
+
     def __init__ (self, filename=None, qifFile=None):
         """
         filename needs to be a QIF 4-digit format file
@@ -64,6 +64,7 @@ class QIF (object):
                 curr_record = _new_record()
                 header_type_name = line.split(':')[1]
                 header_type = self.map_header_types[header_type_name]
+                self.account_type = header_type['account_type']     # FIXME: this should be per-section, not a prop of self
                 continue
 
             if not header_type:
@@ -92,7 +93,8 @@ class QIF (object):
             elif line[0] == 'M':
                 # Memo-any text you want to record about the item.
                 # Mgasoline for my car
-                raise ValueError("unimplemented: %s" % line)
+
+                curr_record['memo'] = re.sub('-.*$', '', line[1:]).replace(' ', '_').replace('&','and')
 
             elif line[0] == 'C':
                 # Cleared status. Values are blank (not cleared), "*" or "c" (cleared) and "X" or "R" (reconciled).
@@ -118,7 +120,7 @@ class QIF (object):
                     raise ValueError("wrong header type for Detail Item: %s" % line)
 
             elif line[0] == 'P':
-                if header_type_name not in ['Bank', 'Invst']:
+                if header_type_name not in ['Bank', 'CCard', 'Invst']:
                     raise ValueError("wrong header type for Detail Item: %s" % line)
 
                 # Payee. Or a description for deposits, transfers, etc.
@@ -135,7 +137,7 @@ class QIF (object):
                 raise ValueError("unimplemented: %s" % line)
 
             elif line[0] == 'L':
-                if header_type_name not in ['Bank', 'Splits']:
+                if header_type_name not in ['Bank', 'CCard', 'Splits']:
                     raise ValueError("wrong header type for Detail Item: %s" % line)
 
                 # Category or Transfer and (optionally) Class. The literal values are those defined in the Quicken Category list.
@@ -143,7 +145,11 @@ class QIF (object):
                 # this can be indicated by a slash ("/") followed by the class literal. For Investments, MiscIncX or MiscExpX actions,
                 # Category/class or transfer/class.
                 # LFuel:car
-                raise ValueError("unimplemented: %s" % line)
+
+                # this appears to be what CC payments from a checking acct look like in an AMEX converted qif
+                if header_type_name != 'CCard':
+                    raise ValueError("unimplemented: %s" % line)
+                continue
 
             elif line[0] == 'F':
                 if header_type_name != 'Bank':
