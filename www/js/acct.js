@@ -119,22 +119,42 @@ app.controller('acctListCtl', ['$scope', '$q', '$routeParams', 'acctListFactory'
                 $scope.creditData = result[1];
             })
         ]).then(function () {
-            var invertedCredits = [];
-            for (var idx in $scope.creditData) {
-                var record = $scope.creditData[idx];
-                var recordCopy = record.slice(0);
-                recordCopy[1] = (Number(record[1]) * -1).toFixed(2);
-                invertedCredits[invertedCredits.length] = recordCopy;
-            }
+            if (['ASSET', 'EXPENSE'].includes($scope.acctType))
+            {
+                var invertedCredits = [];
+                for (var idx in $scope.creditData) {
+                    var record = $scope.creditData[idx];
+                    var recordCopy = record.slice(0);
+                    recordCopy[1] = (Number(record[1]) * -1).toFixed(2);
+                    invertedCredits[invertedCredits.length] = recordCopy;
+                }
 
-            $scope.combinedData = $scope.debitData.concat(invertedCredits)
-                .sort(function (a, b) {
-                    // by date, descending, then by id desc
-                    if (b[2] == a[2]) {
-                        return b[0] - a[0];
-                    }
-                    return b[2] - a[2];
-                });
+                $scope.combinedData = $scope.debitData.concat(invertedCredits)
+                    .sort(function (a, b) {
+                        // by date, descending, then by id desc
+                        if (b[2] == a[2]) {
+                            return b[0] - a[0];
+                        }
+                        return b[2] - a[2];
+                    });
+            } else {
+                var invertedDebits = [];
+                for (var idx in $scope.debitData) {
+                    var record = $scope.debitData[idx];
+                    var recordCopy = record.slice(0);
+                    recordCopy[1] = (Number(record[1]) * -1).toFixed(2);
+                    invertedDebits[invertedDebits.length] = recordCopy;
+                }
+
+                $scope.combinedData = $scope.creditData.concat(invertedDebits)
+                    .sort(function (a, b) {
+                        // by date, descending, then by id desc
+                        if (b[2] == a[2]) {
+                            return b[0] - a[0];
+                        }
+                        return b[2] - a[2];
+                    });
+            }
             var subtotal = 0;
             for (var i = $scope.combinedData.length - 1; i >= 0; i--) {
                 record = $scope.combinedData[i];
