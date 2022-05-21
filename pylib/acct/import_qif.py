@@ -12,15 +12,22 @@ import config
 import os
 import qif
 import re
+import sys
 from sqldata import DBHandle
 from payeeMap import map_payees
 
 if __name__ == "__main__":
+    print("QIF import started with args: %s" % sys.argv)
+    try:
+        qifInput = sys.argv[1:]
+    except IndexError:
+        print("ERR: Must supply QIF input files as commandline arguments")
+        sys.exit(1)
     already_done = []
     db = DBHandle(dbfile=os.path.join(config.DBDIR, 'data.db.mdgnew'))
 
-    for source_account in ["AMEX"]:
-        fname = "%s.qif" % source_account
+    for fname in qifInput:
+        source_account = fname.replace('.qif', '')
         q=qif.QIF(filename=fname)
 
         xacts = q.sections[0]
@@ -85,7 +92,7 @@ if __name__ == "__main__":
                     x.add_credit(source_account, q.account_type, amount)
                     x.add_debit(aname, atype, amount)
 
-            print("new %s xact: %s %s - %s" % (source_account, matched_account, amount, xact['payee']))
+            print("new %s (%s) xact: %s %s - %s" % (source_account, q.account_type, matched_account, amount, xact['payee']))
             x.save(create=True, date=xact['date'], description=xact['payee'])
         
         already_done.append(source_account)
